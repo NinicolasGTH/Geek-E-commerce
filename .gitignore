@@ -1,0 +1,7 @@
+.coverage
+.pytest_cache/
+__pycache__/
+*.py[cod]
+local_live_test.db
+server.log
+server.err.log

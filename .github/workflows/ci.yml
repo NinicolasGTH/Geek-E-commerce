@@ -43,7 +43,7 @@ jobs:
           PY
 
       - name: Rodar testes com cobertura
-        run: pytest --cov=. --cov-fail-under=90
+        run: python -m pytest --cov=. --cov-fail-under=90
 
       - name: Mostrar log da aplicação se falhar
         if: failure()
