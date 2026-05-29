@@ -1,0 +1,50 @@
+name: CI GeekStore
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    env:
+      DB_PATH: ci_geekstore.db
+      LIVE_SERVER_URL: http://127.0.0.1:8000
+
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Iniciar aplicação em background
+        run: |
+          uvicorn main:app --host 127.0.0.1 --port 8000 > server.log 2>&1 &
+          python - <<'PY'
+          import time
+          import urllib.request
+
+          for _ in range(30):
+              try:
+                  with urllib.request.urlopen("http://127.0.0.1:8000/api/produtos", timeout=1) as response:
+                      if response.status == 200:
+                          raise SystemExit(0)
+              except Exception:
+                  time.sleep(1)
+
+          raise SystemExit("A aplicação não respondeu dentro do tempo esperado.")
+          PY
+
+      - name: Rodar testes com cobertura
+        run: pytest --cov=. --cov-fail-under=90
+
+      - name: Mostrar log da aplicação se falhar
+        if: failure()
+        run: cat server.log

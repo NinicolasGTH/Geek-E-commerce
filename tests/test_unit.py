@@ -1,7 +1,7 @@
 import pytest
-from unittest.mock import mock
+from unittest.mock import Mock
 
-from main import calcular_desconto, processar_pedido
+from main import GatewayPagamento, calcular_desconto, processar_pedido
 
 def test_calcular_desconto():
     resultado = calcular_desconto(200.0, "GEEK20")
@@ -19,7 +19,7 @@ def test_processar_pedido_com_gateway_aprovado():
 
     resultado = processar_pedido(200.0, "1234", gateway_mock)
 
-    assert resultado == "Compra aprovada."
+    assert resultado == "Compra aprovada!"
     gateway_mock.cobrar.assert_called_once_with("1234", 200.0)
 
 def test_processar_pedido_com_valor_zero():
@@ -28,4 +28,20 @@ def test_processar_pedido_com_valor_zero():
     with pytest.raises(ValueError) as erro:
         processar_pedido(0, "1234", gateway_mock)
 
-        assert "Pagamento recusado" in str(erro.value)
+    assert "maior que zero" in str(erro.value)
+    gateway_mock.cobrar.assert_not_called()
+
+def test_processar_pedido_com_gateway_recusado():
+    gateway_mock = Mock()
+    gateway_mock.cobrar.return_value = False
+
+    with pytest.raises(ValueError) as erro:
+        processar_pedido(200.0, "1234", gateway_mock)
+
+    assert "Pagamento recusado" in str(erro.value)
+    gateway_mock.cobrar.assert_called_once_with("1234", 200.0)
+
+def test_gateway_pagamento_padrao_aprova():
+    gateway = GatewayPagamento()
+
+    assert gateway.cobrar("1234", 200.0) is True

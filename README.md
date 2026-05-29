@@ -41,3 +41,14 @@ pytest
 **Para correr os testes e validar a meta de cobertura (Obrigatório para a entrega):**
 
 pytest --cov=. --cov-fail-under=90
+
+## O que a suíte cobre
+
+- Testes unitários das regras de desconto e processamento de pagamento.
+- Testes com mock para o `GatewayPagamento`.
+- Testes de API com FastAPI `TestClient`.
+- Fixture de banco temporário em arquivo para não sujar o banco principal.
+- Cenário BDD em Gherkin para compra com sucesso.
+- Contrato Tavern para `GET /api/produtos`.
+- Teste E2E Selenium headless para o fluxo completo da tela.
+- Pipeline GitHub Actions em `.github/workflows/ci.yml`.

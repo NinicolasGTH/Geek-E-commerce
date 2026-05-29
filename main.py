@@ -1,5 +1,6 @@
 import sqlite3
 import os
+from pathlib import Path
 from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from fastapi.responses import HTMLResponse
@@ -65,7 +66,7 @@ def startup_event():
 @app.get("/api/produtos")
 def listar_produtos():
     conn = get_db_connection()
-    produtos = conn.execute('SELECT * FROM produtos').fetchall()
+    produtos = conn.execute('SELECT * FROM produtos ORDER BY nome').fetchall()
     conn.close()
     return [dict(p) for p in produtos]
 
@@ -98,5 +99,6 @@ def comprar(req: CompraRequest, gateway: GatewayPagamento = Depends(get_gateway)
 # Rota do Frontend
 @app.get("/", response_class=HTMLResponse)
 def frontend():
-    with open("index.html", "r", encoding="utf-8") as f:
+    index_path = Path(__file__).with_name("index.html")
+    with open(index_path, "r", encoding="utf-8") as f:
         return f.read()
